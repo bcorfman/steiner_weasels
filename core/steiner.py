@@ -1,7 +1,11 @@
+""" Steiner.py: main module for Steiner Weasels """
+
 import math
+import random
 
 
 class Steiner:
+    """ Main class for creating the app."""
 
     def __init__(self):
         self.xmin = 0
@@ -44,9 +48,13 @@ class Steiner:
         self.drawon = True
         self.target = False
         self.digitizing = False
+        self.pixel_fmt = None
+        self.box = None
+        self.pop = None
+        self.status_report = ""
 
     def data2pixel(self, xval, yval):
-        # scale plot point to dxmin, dxmax, dymin, dymax
+        """ scale plot point to dxmin, dxmax, dymin, dymax """
         x = self.xmin + (self.xmax - self.xmin) * (xval - self.dxmin) / (
             self.dxmax - self.dxmin)
         y = self.ymax + (self.ymin - self.ymax) * (yval - self.dymin) / (
@@ -54,6 +62,7 @@ class Steiner:
         return x, y
 
     def pixel2data(self, x, y):
+        """ scales location to boundaries """
         xval = self.dxmin + (x - self.xmin) * (self.dxmax - self.dxmin) / (
             self.xmax - self.xmin)
         yval = self.dymin + (y - self.ymax) * (self.dymax - self.dymin) / (
@@ -61,6 +70,7 @@ class Steiner:
         return xval, yval
 
     def report(self, pt):
+        """ Reports point location """
         if self.box.pt_in_rect(pt):
             xt, yt = self.pixel2data(pt.x, pt.y)
             xt, yt = math.floor(xt), math.floor(yt)
@@ -69,6 +79,7 @@ class Steiner:
             self.pixel_fmt = 'Ready'
 
     def allocate(self):
+        """ Reserving memory when setting up a new session. """
         self.npts = self.fixednodes + self.varbnodes
         # nC2, n things 2 at a time
         self.combs = self.npts * (self.npts - 1) / 2
@@ -84,3 +95,24 @@ class Steiner:
         self.got = [False for _ in range(self.npts)]
         self.fitness = [self.death for _ in range(self.maxpop)]
         self.sortids = [-1 for _ in range(self.maxpop)]
+
+    def create(self):
+        """ Creating a population of weasels. """
+        self.pop = [self.create_one() for _ in range(self.maxpop)]
+        self.status_report = "Pop created"
+
+    def create_one(self):
+        """ Make one weasel only. """
+        critter = ''
+        x = random.random()
+        num = math.floor(self.varbnodes * x)
+        num = self.varbnodes
+        if num < 10:
+            temp = f'{num:01d}'
+        else:
+            temp = f'{num:2d}'
+        critter += temp
+
+        # second, the variable node coords
+        for _ in range(self.varbnodes * 3 * 2):
+            x = random.random()
